@@ -4,14 +4,14 @@ import todoMachine from "../machines/todoMachine";
 import { v4 } from "uuid";
 
 export interface Todo {
-  id: string;
-  text: string;
+  id: number | string;
+  title: string;
   completed: boolean;
-  createdAt: Date;
+  userId: number;
 }
 
 const Todo: React.FC = () => {
-  const [state, send] = useMachine(todoMachine, {});
+  const [state, send] = useMachine(todoMachine);
   const [input, setInput] = useState<string>("");
 
   const todos: Todo[] = state.context.todoStore || [];
@@ -20,16 +20,16 @@ const Todo: React.FC = () => {
     if (input.trim()) {
       const newTodo: Todo = {
         id: v4(),
-        text: input,
+        title: input,
         completed: false,
-        createdAt: new Date(),
+        userId: 10,
       };
       send({ type: "addTodoIntoStore", todo: newTodo });
       setInput("");
     }
   };
 
-  const deleteTodo = (id: string) => {
+  const deleteTodo = (id: string | number) => {
     send({ type: "removeTodoFromStore", todoId: id });
   };
 
@@ -57,11 +57,11 @@ const Todo: React.FC = () => {
             <li
               key={todo.id}
               className={`flex items-center justify-between mb-2 ${
-                todo.completed ? "line-through text-gray-500" : ""
+                todo.completed ? "line-through text-white" : ""
               }`}
             >
               <span className="cursor-pointer flex-grow text-slate-200">
-                {todo.text}
+                {todo.title}
               </span>
               <button
                 onClick={() => deleteTodo(todo.id)}

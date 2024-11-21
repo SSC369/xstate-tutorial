@@ -1,19 +1,23 @@
-import { assign, createMachine } from "xstate";
+import { assign, fromPromise, setup } from "xstate";
 import { Todo } from "../components/Todo";
 
 interface todoStore {
   todoStore: Todo[];
 }
 
-const loadTodos = async () => {
-  const response = await fetch("https://jsonplaceholder.typicode.com/todos");
-  if (!response.ok) {
-    throw new Error("Failed to load todos");
-  }
-  return await response.json();
-};
-
-const todoMachine = createMachine({
+const todoMachine = setup({
+  actors: {
+    loadTodos: fromPromise(async () => {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/todos",
+        {
+          method: "GET",
+        }
+      );
+      return response.json();
+    }),
+  },
+}).createMachine({
   id: "todo",
   initial: "idle",
   context: {
@@ -22,7 +26,16 @@ const todoMachine = createMachine({
   states: {
     idle: {
       invoke: {
-        src: loadTodos,
+        src: "loadTodos",
+        onDone: {
+          actions: assign({
+            todoStore: (data) => {
+              const { event } = data;
+              return event.output;
+            },
+          }),
+          target: "active",
+        },
       },
     },
     active: {
@@ -47,20 +60,20 @@ const todoMachine = createMachine({
                 return todoStore.filter((todo: Todo) => todo.id !== todoId);
               },
             }),
-            guard: (data) => {
-              const { context, event } = data;
-              const { todoStore } = context;
-              const { todoId } = event;
-              const present = new Date();
-              const todo: Todo = todoStore.find(
-                (todo: Todo) => todoId === todo.id
-              )!;
-              console.log(present.getTime() - todo.createdAt.getTime());
-              if (present.getTime() - todo.createdAt.getTime() > 2000) {
-                return true;
-              }
-              return false;
-            },
+            // guard: (data) => {
+            //   const { context, event } = data;
+            //   const { todoStore } = context;
+            //   const { todoId } = event;
+            //   const present = new Date();
+            //   const todo: Todo = todoStore.find(
+            //     (todo: Todo) => todoId === todo.id
+            //   )!;
+            //   console.log(present.getTime() - todo.createdAt.getTime());
+            //   if (present.getTime() - todo.createdAt.getTime() > 2000) {
+            //     return true;
+            //   }
+            //   return false;
+            // },
             target: "deleteSuccess",
           },
           //if guard fails, transitioned to next action.
