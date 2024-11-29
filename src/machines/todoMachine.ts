@@ -1,10 +1,6 @@
 import { assign, fromPromise, setup } from "xstate";
 import { Todo } from "../components/Todo";
 
-interface todoStore {
-  todoStore: Todo[];
-}
-
 const todoMachine = setup({
   actors: {
     loadTodos: fromPromise(async () => {
