@@ -34,7 +34,7 @@ export const buttonStyle: ButtonStyleType = {
 };
 
 export const buttonSizes: ButtonSizesType = {
-  large: "w-[320px] h-12  rounded-xl text-lg font-semibold",
-  medium: "w-[200px] h-10  rounded-lg text-base font-medium",
+  large: "min-w-[320px] min-h-12  rounded-xl text-lg font-semibold",
+  medium: "min-w-[200px] min-h-10  rounded-lg text-base font-medium",
   small: "px-5 h-10 rounded text-sm",
 };
